@@ -11,11 +11,6 @@ const Record = ({name, vote}) => {
 )
 }
 
-const findMax = ({vote}) => {
-  console.log('vote', {vote})
-  return ( 5 )
-}
-
 const App = () => {
   const anecdotes = [
     'If it hurts, do it more often.',
