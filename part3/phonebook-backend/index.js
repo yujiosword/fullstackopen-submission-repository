@@ -40,6 +40,7 @@ app.get('/api/persons', (req, res, next) => {
 app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id)
     .then(person => {
+      if (!person) return res.status(404).end()
       res.json(person)
     })
     .catch(error => next(error))
@@ -49,7 +50,8 @@ app.get('/api/persons/:id', (req, res, next) => {
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
     .then(person => {
-      res.status(204).end()
+      if (!person) return res.status(404).end()
+      return res.status(204).end()
     })
     .catch(error => next(error))
 })
@@ -58,39 +60,35 @@ app.delete('/api/persons/:id', (req, res, next) => {
 // PUT phonebook with id
 app.put('/api/persons/:id', (req, res, next) => {
   const { name, number } = req.body
-  Person.findById(req.params.id)
-    .then(person => {
-      if (!person) {
-        return res.status(404).end()
-      }
-      person.name = name
-      person.number = number
+  // Person.findById(req.params.id)
+  //   .then(person => {
+  //     if (!person) {
+  //       return res.status(404).end()
+  //     }
+  //     person.name = name
+  //     person.number = number
       
-      return person.save().then(updatedPerson => {
-        res.json(updatedPerson)
-      })
+  //     return person.save().then(updatedPerson => {
+  //       res.json(updatedPerson)
+  //     })
+  //   })
+  //   .catch(error => next(error))
+  Person.findByIdAndUpdate(
+    req.params.id,
+    {name,number},
+    {new:true, runValidators: true}
+  )
+    .then(updatedPerson => {
+      if (!updatedPerson) return res.status(404).end()
+      res.json(updatedPerson)
     })
     .catch(error => next(error))
-  // Person.findByIdAndUpdate(req.params.id, {number: req.body.number})
-  // .then(person => {
-  //   const updatedPerson = {
-  //     id: req.params.id,
-  //     name: req.body.name,
-  //     number: req.body.number,
-  //   }
-  //   res.json(updatedPerson)
-  // })
-  // .catch(error => {
-  //   res.status(400).json({ error: 'malformatted id' })
-  // })
 })
 
 // POST new phonebook
 app.post('/api/persons', (req, res, next) => {
   const body = req.body
-  if (!body.name || !body.number) {
-    return res.status(400).send({error: 'name or number is missing'})
-  }
+
   Person.exists({name: body.name})
     .then(result => {
       if (result) {
@@ -115,7 +113,9 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
 
   next(error)
 }

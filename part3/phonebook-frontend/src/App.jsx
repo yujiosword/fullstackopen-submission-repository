@@ -47,10 +47,10 @@ const App = () => {
           })
           .catch(error => {
             setMessage({
-              context: `Information of ${newName} has already been removed from server`,
+              context: error.response.data.error,
               type: 'error'
             })
-            setPersons(persons.filter(person => person.name != newName))
+            // setPersons(persons.filter(person => person.name != newName))
             setTimeout(() => {
               setMessage(null)
             }, 5000)
@@ -78,8 +78,9 @@ const App = () => {
           setNewNumber('')
         })
         .catch(error => {
+          // console.log(error)
           setMessage({
-            context: `Failed to add ${newName}`,
+            context: error.response.data.error,
             type: 'error'
           })
           setTimeout(() => {
