@@ -6,10 +6,10 @@ var morgan = require('morgan')
 
 
 // creating new tokens method + JSON.stringify
-morgan.token('content', (req, res) => (
+morgan.token('content', (req) => (
   req.method === 'POST'
-  ? JSON.stringify(req.body) 
-  : null
+    ? JSON.stringify(req.body)
+    : null
 ))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'))
 app.use(express.json())
@@ -67,7 +67,6 @@ app.put('/api/persons/:id', (req, res, next) => {
   //     }
   //     person.name = name
   //     person.number = number
-      
   //     return person.save().then(updatedPerson => {
   //       res.json(updatedPerson)
   //     })
@@ -75,8 +74,8 @@ app.put('/api/persons/:id', (req, res, next) => {
   //   .catch(error => next(error))
   Person.findByIdAndUpdate(
     req.params.id,
-    {name,number},
-    {new:true, runValidators: true}
+    { name,number },
+    { new:true, runValidators: true }
   )
     .then(updatedPerson => {
       if (!updatedPerson) return res.status(404).end()
@@ -89,10 +88,10 @@ app.put('/api/persons/:id', (req, res, next) => {
 app.post('/api/persons', (req, res, next) => {
   const body = req.body
 
-  Person.exists({name: body.name})
+  Person.exists({ name: body.name } )
     .then(result => {
       if (result) {
-        return res.status(400).send({error: 'name must be unique'})
+        return res.status(400).send({ error: 'name must be unique' })
       }
       else {
         const person = new Person({
@@ -122,7 +121,7 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler)
 
-const PORT = process.env.PORT || 3001 
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log('server is running')
 })
