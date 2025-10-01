@@ -1,4 +1,4 @@
-const PersonForm = ({onSubmit, nameValue, onNameChange, numberValue, onNumberChange}) => {
+const PersonForm = ({ onSubmit, nameValue, onNameChange, numberValue, onNumberChange }) => {
   return (
     <>
       <form onSubmit={onSubmit}>

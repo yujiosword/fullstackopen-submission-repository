@@ -12,7 +12,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [searchName, setSearchName] = useState('')
   const [message, setMessage] = useState(null)
-  
+
   useEffect(() => {
     phonebooksService.getAll()
       .then(fullData => { setPersons(fullData) })
@@ -25,7 +25,7 @@ const App = () => {
     if (targetIndex > -1) {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         const targetPerson = persons[targetIndex]
-        const newObject = { 
+        const newObject = {
           ...targetPerson ,
           number: newNumber,
         }
@@ -93,22 +93,22 @@ const App = () => {
   const deletePerson = (name, id) => {
     if (window.confirm(`Delete ${name}?`)) {
       phonebooksService.remove(id)
-        .then(deletedData => {
+        .then(() => {
           setMessage({
             context: `Data of ${name} with id ${id} is deleted`,
             type: 'info'
-          })          
+          })
           setTimeout(() => {
             setMessage(null)
           }, 5000)
-          setPersons(persons.filter(person => person.id != id))
+          setPersons(persons.filter(person => person.id !== id))
         })
-        .catch(error => {
+        .catch(() => {
           setMessage({
             context: `Information of ${name} has already been removed from server`,
             type: 'error'
           })
-          setPersons(persons.filter(person => person.name != name))
+          setPersons(persons.filter(person => person.name !== name))
           setTimeout(() => {
             setMessage(null)
           }, 5000)
@@ -124,11 +124,11 @@ const App = () => {
       <PersonForm onSubmit={addNewPerson} nameValue={newName} onNameChange={(event) => setNewName(event.target.value)}
       numberValue={newNumber} onNumberChange={(event) => setNewNumber(event.target.value)} />
       <h3>Numbers</h3>
-      {persons.filter(value => value.name.toLowerCase().includes(searchName.toLowerCase())).map(person => 
+      {persons.filter(value => value.name.toLowerCase().includes(searchName.toLowerCase())).map(person =>
           <div key={person.id}>
             <Persons person={person} onClick={() => deletePerson(person.name, person.id)} />
           </div>
-      )}   
+      )}
     </div>
   )
 }
