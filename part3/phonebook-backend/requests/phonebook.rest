@@ -1,24 +1,30 @@
 GET http://localhost:3001/info
 
 ###
-GET http://localhost:3001/api/persons
+GET http://localhost:3001/api/persons/68dca055c25f75c484fe515f
 
 ###
-GET http://localhost:3001/api/persons/2
+GET http://localhost:3001/api/persons/68da8efc64e8c0b94d53f64
 
 ###
-GET http://localhost:3001/api/persons/6
+DELETE http://localhost:3001/api/persons/68dbf0727db769ffaa2e0c37
 
 ###
-DELETE http://localhost:3001/api/persons/4
-
-###
-POST https://phonebook-backend-twilight-violet-453.fly.dev/api/persons
+PUT http://localhost:3001/api/persons/68dca055c25f75c484fe515f
 Content-Type: application/json
 
 {
-  "name": "Kin",
-  "number": "1234"
+  "name": "hello2",
+  "number": "12311111"
+}
+
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "hello",
+  "number": "1231"
 }
 
 ###
