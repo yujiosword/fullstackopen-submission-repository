@@ -1,0 +1,24 @@
+GET http://localhost:3003/api/blogs
+
+###
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+
+{
+  "title": "Wiki_Blog2",
+  "author": "wikipedia2",
+  "url": "https://en.wikipedia.org/wiki/Blog"
+}
+
+###
+DELETE http://localhost:3003/api/blogs/68dbf06e7db769ffaa2e0c34
+
+###
+PUT http://localhost:3003/api/blogs/68dca055c25f75c484fe515f
+Content-Type: application/json
+
+{
+  "name": "hello2",
+  "number": "1231111-111"
+}
+
