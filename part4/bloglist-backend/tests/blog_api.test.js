@@ -87,6 +87,31 @@ describe('return 400 Bad Request if missing title/url', () => {
   })
 })
 
+test('delete a blog post when given a valid id', async () => {
+  const blogsAtStart = await helper.getAllBlogs()
+  const blogToDelete = blogsAtStart[0]
+
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+
+  const blogsAtEnd = await helper.getAllBlogs()
+
+  assert(!blogsAtEnd.some(blog => blog.id === blogToDelete.id))
+  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+})
+
+test('update likes number of a post when given a valid id', async () => {
+  const blogsAtStart = await helper.getAllBlogs()
+  const blogToUpdate = structuredClone(blogsAtStart[0])
+
+  blogToUpdate.likes += 1
+
+  const response = await api
+    .put(`/api/blogs/${blogToUpdate.id}`)
+    .send(blogToUpdate)
+    .expect(200)
+
+  assert(response.body.likes, blogsAtStart[0].likes + 1)
+})
 
 after(async () => {
   await mongoose.connection.close()
