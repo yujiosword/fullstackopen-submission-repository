@@ -11,11 +11,13 @@ blogRouter.get('/', async (request, response) => {
 
 blogRouter.post('/', async (request, response) => {
   const blog = new Blog({ ...request.body, likes: request.body.likes ?? 0 })
-  if (typeof(blog.title) === 'string' && typeof(blog.url) === 'string') {
+  if (typeof(blog.title) === 'undefined' || typeof(blog.url) === 'undefined') {
+    response.status(400).end()
+  }
+  else {
     const newBlog= await blog.save()
     response.status(201).json(newBlog)
   }
-  else response.status(400).end()
 })
 
 module.exports = blogRouter
