@@ -110,7 +110,7 @@ test('update likes number of a post when given a valid id', async () => {
     .send(blogToUpdate)
     .expect(200)
 
-  assert(response.body.likes, blogsAtStart[0].likes + 1)
+  assert.strictEqual(response.body.likes, blogsAtStart[0].likes + 1)
 })
 
 after(async () => {
