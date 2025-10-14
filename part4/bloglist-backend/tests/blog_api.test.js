@@ -5,11 +5,17 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
-
-
+const User= require('../models/user')
+const bcrypt = require('bcrypt')
+// const jwt = require('jsonwebtoken')
 const api = supertest(app)
 
 beforeEach(async () => {
+  await User.deleteMany({})
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const rootUser = new User({ username: 'root', passwordHash })
+  await rootUser.save()
+
   await Blog.deleteMany({})
   await Blog.insertMany(helper.initialBlogs)
 })
@@ -31,32 +37,38 @@ test('unique identifer property is id instead of _id', async () => {
   assert(Object.keys(response.body[0]).includes('id'))
 })
 
-test('test POST can create a new blog post', async () => {
+test('POST will return 401 if missing auth', async () => {
+  const user = await User.findOne({ username: 'root' })
   const newBlog = {
     title: 'Test Post',
     author: 'Kin',
     url: 'https://hello.com/',
     likes: 2,
+    user: user._id,
   }
   await api
     .post('/api/blogs')
     .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
+    .expect(401)
+    // .expect('Content-Type', /application\/json/)
 
-  const blogsAtEnd = await helper.getAllBlogs()
+  // const blogsAtEnd = await helper.getAllBlogs()
   // console.log('blogsAtEnd', blogsAtEnd)
-  assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
+  // assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
 })
 
 test('if the likes property is missing, default to value 0', async () => {
+  const user = await User.findOne({ username: 'root' })
+  const token = await helper.generateTokenForUser(user.username)
   const newBlog = {
     title: 'Test default likes value',
     author: 'Kin2',
     url: 'https://hello.com/',
+    user: user._id,
   }
   const response = await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
 
   // console.log('response', response.body)
@@ -65,23 +77,31 @@ test('if the likes property is missing, default to value 0', async () => {
 
 describe('return 400 Bad Request if missing title/url', () => {
   test('title', async () => {
+    const user = await User.findOne({ username: 'root' })
+    const token = await helper.generateTokenForUser(user.username)
     const newBlog = {
       author: 'Kin3',
       url: 'https://hello.com/',
+      user: user._id
     }
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
   })
 
   test('url', async () => {
+    const user = await User.findOne({ username: 'root' })
+    const token = await helper.generateTokenForUser(user.username)
     const newBlog = {
       title: 'Test default likes value',
       author: 'Kin4',
+      user: user._id
     }
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
   })
@@ -111,6 +131,27 @@ test('update likes number of a post when given a valid id', async () => {
     .expect(200)
 
   assert.strictEqual(response.body.likes, blogsAtStart[0].likes + 1)
+})
+
+test('POST request requires correct auth token', async () => {
+  const user = await User.findOne({ username: 'root' })
+  const token = await helper.generateTokenForUser(user.username)
+  const newBlog = {
+    title: 'Test Post',
+    author: 'Kin',
+    url: 'https://hello.com/',
+    likes: 2,
+  }
+  const response = await api
+    .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.getAllBlogs()
+  assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
+  assert.strictEqual(user._id.toString(), response.body.user)
 })
 
 after(async () => {

@@ -5,8 +5,8 @@ POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-  "title": "Wiki_Blog2",
-  "author": "wikipedia2",
+  "title": "Wiki_Blog3",
+  "author": "wikipedia3",
   "url": "https://en.wikipedia.org/wiki/Blog"
 }
 
