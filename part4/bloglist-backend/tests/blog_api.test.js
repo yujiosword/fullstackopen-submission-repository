@@ -4,20 +4,15 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
-const Blog = require('../models/blog')
+// const Blog = require('../models/blog')
 const User= require('../models/user')
-const bcrypt = require('bcrypt')
+// const bcrypt = require('bcrypt')
 // const jwt = require('jsonwebtoken')
 const api = supertest(app)
 
 beforeEach(async () => {
-  await User.deleteMany({})
-  const passwordHash = await bcrypt.hash('sekret', 10)
-  const rootUser = new User({ username: 'root', passwordHash })
-  await rootUser.save()
-
-  await Blog.deleteMany({})
-  await Blog.insertMany(helper.initialBlogs)
+  await helper.initialBlogsWithRootUser()
+  await helper.initialUserWithoutBlogs()
 })
 
 test('test GET returns correct amount of blogs in JSON', async () => {
@@ -32,9 +27,28 @@ test('test GET returns correct amount of blogs in JSON', async () => {
 
 test('unique identifer property is id instead of _id', async () => {
   const response = await api.get('/api/blogs')
-  // console.log('response.body', response.body)
-  // console.log('Object.keys(response.body)', Object.keys(response.body[0]))
   assert(Object.keys(response.body[0]).includes('id'))
+})
+
+test('POST request requires correct auth token', async () => {
+  const user = await User.findOne({ username: 'root' })
+  const token = await helper.generateTokenForUser(user.username)
+  const newBlog = {
+    title: 'Test Post',
+    author: 'Kin',
+    url: 'https://hello.com/',
+    likes: 2,
+  }
+  const response = await api
+    .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.getAllBlogs()
+  assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
+  assert.strictEqual(user._id.toString(), response.body.user)
 })
 
 test('POST will return 401 if missing auth', async () => {
@@ -50,11 +64,6 @@ test('POST will return 401 if missing auth', async () => {
     .post('/api/blogs')
     .send(newBlog)
     .expect(401)
-    // .expect('Content-Type', /application\/json/)
-
-  // const blogsAtEnd = await helper.getAllBlogs()
-  // console.log('blogsAtEnd', blogsAtEnd)
-  // assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
 })
 
 test('if the likes property is missing, default to value 0', async () => {
@@ -71,7 +80,6 @@ test('if the likes property is missing, default to value 0', async () => {
     .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
 
-  // console.log('response', response.body)
   assert.strictEqual(response.body.likes, 0)
 })
 
@@ -107,16 +115,38 @@ describe('return 400 Bad Request if missing title/url', () => {
   })
 })
 
-test('delete a blog post when given a valid id', async () => {
-  const blogsAtStart = await helper.getAllBlogs()
-  const blogToDelete = blogsAtStart[0]
+describe('delete a blog', async () => {
+  test('valid id and valid token', async () => {
+    const blogsAtStart = await helper.getAllBlogs()
+    const blogToDelete = blogsAtStart[0]
+    const user = await User.findById(blogToDelete.user)
+    const token = await helper.generateTokenForUser(user.username)
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204)
 
-  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+    const blogsAtEnd = await helper.getAllBlogs()
 
-  const blogsAtEnd = await helper.getAllBlogs()
+    assert(!blogsAtEnd.some(blog => blog.id === blogToDelete.id))
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+  })
 
-  assert(!blogsAtEnd.some(blog => blog.id === blogToDelete.id))
-  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+  test('valid id but invalid token', async () => {
+    const blogsAtStart = await helper.getAllBlogs()
+    const blogToDelete = blogsAtStart[0]
+    const user = await User.findOne({ username: 'Kin' })
+    const token = await helper.generateTokenForUser(user.username)
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(401)
+
+    const blogsAtEnd = await helper.getAllBlogs()
+
+    assert(blogsAtEnd.some(blog => blog.id === blogToDelete.id))
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
+  })
 })
 
 test('update likes number of a post when given a valid id', async () => {
@@ -131,27 +161,6 @@ test('update likes number of a post when given a valid id', async () => {
     .expect(200)
 
   assert.strictEqual(response.body.likes, blogsAtStart[0].likes + 1)
-})
-
-test('POST request requires correct auth token', async () => {
-  const user = await User.findOne({ username: 'root' })
-  const token = await helper.generateTokenForUser(user.username)
-  const newBlog = {
-    title: 'Test Post',
-    author: 'Kin',
-    url: 'https://hello.com/',
-    likes: 2,
-  }
-  const response = await api
-    .post('/api/blogs')
-    .set('Authorization', `Bearer ${token}`)
-    .send(newBlog)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
-
-  const blogsAtEnd = await helper.getAllBlogs()
-  assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
-  assert.strictEqual(user._id.toString(), response.body.user)
 })
 
 after(async () => {
