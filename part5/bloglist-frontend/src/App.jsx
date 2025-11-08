@@ -3,6 +3,28 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+const Notificaiton = ({ className, message }) => {
+  let style
+  const infoStyle = {
+    color: 'green',
+    fontSize: '20px'
+  }
+  const errorStyle = {
+    color: 'red',
+    fontSize: '20px'
+  }
+  className == 'error'
+  ? style = errorStyle
+  : style = infoStyle
+  if (message) {
+    return (
+      <div style={style}>
+        {message}
+      </div>
+    )
+  }
+}
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
@@ -11,6 +33,7 @@ const App = () => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -29,12 +52,21 @@ const App = () => {
   
   const handleLogin = async (event) => {
     event.preventDefault()
-    const user = await loginService.login({ username, password })
-    blogService.setToken(user.token)
-    setUser(user)
-    setUsername('')
-    setPassword('')
-    window.localStorage.setItem('loggedUserJSON', JSON.stringify(user))
+    try {
+      const user = await loginService.login({ username, password })
+      blogService.setToken(user.token)
+      setMessage('')
+      setUser(user)
+      setUsername('')
+      setPassword('')
+      window.localStorage.setItem('loggedUserJSON', JSON.stringify(user))
+    }
+    catch {
+      setTimeout(() => {
+        setMessage('')
+      }, 5000)
+      setMessage('wrong username or password')
+    }
   }
 
   const submitBlog = async (event) => {
@@ -42,43 +74,50 @@ const App = () => {
     const newBlog = { title, author, url }
     const createdBlog = await blogService.create(newBlog)
     setBlogs(blogs.concat(createdBlog))
+    setTimeout(() => {
+      setMessage('')
+    }, 5000)
+    setMessage(`a new blog ${title} by ${author} added`)
   }
 
   const logout = () => {
     window.localStorage.removeItem('loggedUserJSON')
     setUser(null)
+    setMessage('')
   }
 
   const loginForm = () => (
     <div>
       <h2>log in to application</h2>
-        <form onSubmit={handleLogin}>
-          <div>
-            <label>
-              username
-              <input 
-                type='text' 
-                value={username} 
-                onChange={({target}) => setUsername(target.value)}/>
-            </label>
-          </div>
-          <div>
-            <label>
-              password
-              <input 
-                type='text' 
-                value={password} 
-                onChange={({target}) => setPassword(target.value)}/>
-            </label>
-          </div>
-          <button type="submit">login</button>
-        </form>
+      <Notificaiton className='error' message={message}/>
+      <form onSubmit={handleLogin}>
+        <div>
+          <label>
+            username
+            <input 
+              type='text' 
+              value={username} 
+              onChange={({target}) => setUsername(target.value)}/>
+          </label>
+        </div>
+        <div>
+          <label>
+            password
+            <input 
+              type='text' 
+              value={password} 
+              onChange={({target}) => setPassword(target.value)}/>
+          </label>
+        </div>
+        <button type="submit">login</button>
+      </form>
     </div>
   )
 
   const blogList = () => (
     <div>
       <h2>blogs</h2>
+      <Notificaiton className='info' message={message} />
       <p>
         {user.username} logged in
         <button type='button' onClick={logout}>
