@@ -34,6 +34,10 @@ const App = () => {
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
   const [message, setMessage] = useState('')
+  const [visible, setVisible] = useState(false)
+
+  const hideWhenVisible = { display: visible ? 'none' : '' }
+  const showWhenVisible = { display: visible ? '' : 'none' }
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -78,12 +82,17 @@ const App = () => {
       setMessage('')
     }, 5000)
     setMessage(`a new blog ${title} by ${author} added`)
+    toggleVisibility()
   }
 
   const logout = () => {
     window.localStorage.removeItem('loggedUserJSON')
     setUser(null)
     setMessage('')
+  }
+
+  const toggleVisibility = () => {
+    setVisible(!visible)
   }
 
   const loginForm = () => (
@@ -124,6 +133,12 @@ const App = () => {
           logout
         </button>
       </p>
+      <div style={hideWhenVisible}>
+        <button type='button' onClick={toggleVisibility} >
+            create new blog
+        </button>
+      </div>
+      <div style={showWhenVisible}>
       <h2>create new</h2>
         <form onSubmit={submitBlog}>
           <div>
@@ -155,6 +170,10 @@ const App = () => {
           </div>
           <button type="submit">create</button>
         </form>
+        <button type='button' onClick={toggleVisibility} >
+            cancel
+        </button>
+      </div>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
