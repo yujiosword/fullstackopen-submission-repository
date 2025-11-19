@@ -54,6 +54,14 @@ const App = () => {
     blogFormRef.current.toggleVisibility()
   }
 
+  const addLikes = async (blogObject) => {
+    const newBlogs = [ ...blogs ]
+    const blogToUpdate = newBlogs.find(blog => blog.id === blogObject.id)
+    blogToUpdate.likes += 1
+    await blogService.update(blogToUpdate)
+    setBlogs(newBlogs)
+  }
+
   const logout = () => {
     window.localStorage.removeItem('loggedUserJSON')
     setUser(null)
@@ -80,7 +88,7 @@ const App = () => {
         <BlogForm createBlog={submitBlog} />
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} handleLikes={addLikes}/>
       )}
     </div>
   )

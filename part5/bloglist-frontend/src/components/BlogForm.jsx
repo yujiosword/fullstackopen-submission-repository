@@ -19,17 +19,17 @@ const BlogForm = ({ createBlog }) => {
       <h2>create new</h2>
         <form onSubmit={submitBlog}>
           <div>
-            <label for ="title">
+            <label htmlFor="title">
               title:
               <input 
-                id='title'
-                type='text' 
+                id="title"
+                type="text"
                 value={title} 
                 onChange={({target}) => setTitle(target.value)}/>
             </label>
           </div>
           <div>
-            <label for ="author">
+            <label htmlFor="author">
               author:
               <input 
                 id='author'
@@ -39,7 +39,7 @@ const BlogForm = ({ createBlog }) => {
             </label>
           </div>
           <div>
-            <label for="url">
+            <label htmlFor="url">
               url:
               <input 
                 id="url"
