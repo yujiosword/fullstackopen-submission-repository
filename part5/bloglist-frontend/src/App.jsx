@@ -55,10 +55,15 @@ const App = () => {
   }
 
   const addLikes = async (blogObject) => {
-    const newBlogs = [ ...blogs ]
-    const blogToUpdate = newBlogs.find(blog => blog.id === blogObject.id)
+    const blogToUpdate = await blogService.get(blogObject)
     blogToUpdate.likes += 1
-    await blogService.update(blogToUpdate)
+    delete blogToUpdate.user
+    const updatedBlog = await blogService.update(blogToUpdate)
+    const newBlogs = blogs.map(blog => 
+      blog.id === blogObject.id 
+      ? updatedBlog
+      : blog
+    )
     setBlogs(newBlogs)
   }
 

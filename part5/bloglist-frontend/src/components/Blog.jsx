@@ -18,9 +18,7 @@ const Blog = ({ blog, handleLikes }) => {
   }
 
   const addLikes = () => {
-    const copy = { ...blog }
-    copy.likes += 1
-    handleLikes(copy)
+    handleLikes(blog)
   }
 
   return (
