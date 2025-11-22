@@ -1,4 +1,4 @@
-import { useState, useImperativeHandle } from "react"
+import { useState, useImperativeHandle } from 'react'
 
 const Togglable = (props) => {
   const [visible, setVisible] = useState(false)
@@ -18,7 +18,7 @@ const Togglable = (props) => {
     <div>
       <div style={hideWhenVisible}>
         <button type='button' onClick={toggleVisibility} >
-            {props.buttonLabel}
+          {props.buttonLabel}
         </button>
       </div>
       <div style={showWhenVisible}>

@@ -8,9 +8,9 @@ const Notification = ({ className, message }) => {
     color: 'red',
     fontSize: '20px'
   }
-  className == 'error'
-  ? style = errorStyle
-  : style = infoStyle
+  className === 'error'
+    ? style = errorStyle
+    : style = infoStyle
   if (message) {
     return (
       <div style={style}>

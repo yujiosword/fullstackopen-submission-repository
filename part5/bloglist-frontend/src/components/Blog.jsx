@@ -11,11 +11,11 @@ const Blog = ({ blog, handleLikes, username, handleRemove }) => {
   }
 
   const showWhenVisible = { display: blogDetailVisible ? '' : 'none' }
-  const showRemoveButton = { 
-    display: 
-      username === blog.user.username 
-      ? '' 
-      : 'none' 
+  const showRemoveButton = {
+    display:
+      username === blog.user.username
+        ? ''
+        : 'none'
   }
   const buttonLabel = blogDetailVisible ? 'hide' : 'view'
 
@@ -46,7 +46,7 @@ const Blog = ({ blog, handleLikes, username, handleRemove }) => {
         <div>{username}</div>
         <div style={showRemoveButton}><button onClick={removeBlog}>remove</button></div>
       </div>
-    </div>  
+    </div>
   )
 }
 
