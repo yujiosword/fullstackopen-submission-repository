@@ -70,6 +70,16 @@ const App = () => {
     setBlogs(newBlogs)
   }
 
+  const removeBlog = async blogObject => {
+    const deleteBlogId = blogObject.id
+    const statusCode = await blogService.remove(blogObject)
+    if (statusCode === 204) {
+      console.log('delete success')
+      const newBlogs = blogs.filter(blog => blog.id !== deleteBlogId)
+      setBlogs(newBlogs)
+    } 
+  }
+
   const logout = () => {
     window.localStorage.removeItem('loggedUserJSON')
     setUser(null)
@@ -96,7 +106,12 @@ const App = () => {
         <BlogForm createBlog={submitBlog} />
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} handleLikes={addLikes}/>
+        <Blog key={blog.id} 
+          blog={blog}
+          handleLikes={addLikes}
+          handleRemove={removeBlog}
+          username={user.username}
+        />
       )}
     </div>
   )
