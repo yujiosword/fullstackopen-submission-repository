@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 import { beforeEach, describe } from 'vitest'
 
@@ -28,5 +29,17 @@ describe('<Blog/ >', () => {
     const elementLikes = screen.getByText('likes')
     expect(elementLikes).not.toBeVisible()
 
+  })
+
+  test('blog URL/likes are shown when button clicked', async () => {
+    const user = userEvent.setup()
+    const button = screen.getByText('view')
+    await user.click(button)
+
+    const elementURL = screen.getByText('test url')
+    expect(elementURL).toBeVisible()
+
+    const elementLikes = screen.getByText('likes')
+    expect(elementLikes).toBeVisible()
   })
 })
