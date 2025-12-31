@@ -1,4 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
+const { loginWith, createBlog } = require('./helper')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -22,20 +23,28 @@ describe('Blog app', () => {
 
   describe('Login', () => {
     test('succeeds with correct credentials', async ({ page }) => {
-      await page.getByLabel('username').fill('kinkin')
-      await page.getByLabel('password').fill('1234')
-      await page.getByRole('button', { name: 'login' }).click()
-
+      await loginWith(page, 'kinkin', '1234')
       await expect(page.getByText('kinkin logged in')).toBeVisible()
     })
 
     test('fails with wrong credentials', async ({ page }) => {
-      await page.getByLabel('username').fill('kin')
-      await page.getByLabel('password').fill('1234')
-      await page.getByRole('button', { name: 'login' }).click()
+      await loginWith(page, 'kin', '1234')
 
       await expect(page.getByText('wrong username or password')).toBeVisible()
       await expect(page.getByText('kin logged in')).not.toBeVisible()
+    })
+  })
+  
+  describe('When logged in', () => {
+    beforeEach(async ({ page }) => {
+      await loginWith(page, 'kinkin', '1234')
+    })
+
+    test('a new blog can be created', async ({ page}) => {
+      await createBlog(page, 'book title', 'book author', 'book url')
+
+      await expect(page.getByText('book title', { exact: true })).toBeVisible()
+      await expect(page.getByText('book author', { exact: true })).toBeVisible()
     })
   })
 })
