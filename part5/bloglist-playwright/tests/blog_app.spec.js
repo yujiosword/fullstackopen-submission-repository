@@ -10,7 +10,14 @@ describe('Blog app', () => {
         username: 'kinkin',
         password: '1234'
       }
-  })
+    })
+    await request.post('api/users', {
+      data: {
+        name: 'kinkinkin',
+        username: 'kinkinkin',
+        password: '1234'
+      }
+    })
     await page.goto('/')
   })
 
@@ -65,6 +72,18 @@ describe('Blog app', () => {
 
       await expect(page.getByRole('button', { name: 'view' })).not.toBeVisible()
       await expect(page.getByRole('button', { name: 'hide' })).not.toBeVisible()
+    })
+
+    test('only user add the blog can see blog delete button', async ({ page}) => {
+      await createBlog(page, 'book title', 'book author', 'book url')
+
+      await page.getByRole('button', { name: 'view' }).click()
+      await expect(page.getByRole('button', { name: 'remove' })).toBeVisible()
+
+      await page.getByRole('button', { name: 'logout' }).click()
+      await loginWith(page, 'kinkinkin', '1234')
+      await page.getByRole('button', { name: 'view' }).click()
+      await expect(page.getByRole('button', { name: 'remove' })).not.toBeVisible()
     })
   })
 })

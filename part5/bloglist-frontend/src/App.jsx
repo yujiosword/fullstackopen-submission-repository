@@ -110,7 +110,7 @@ const App = () => {
           blog={blog}
           handleLikes={addLikes}
           handleRemove={removeBlog}
-          username={blog.user.username}
+          username={user.username}
         />
       )}
     </div>
