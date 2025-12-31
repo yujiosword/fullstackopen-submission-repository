@@ -46,5 +46,14 @@ describe('Blog app', () => {
       await expect(page.getByText('book title', { exact: true })).toBeVisible()
       await expect(page.getByText('book author', { exact: true })).toBeVisible()
     })
+
+    test('a blog can be liked', async ({ page}) => {
+      await createBlog(page, 'book title', 'book author', 'book url')
+
+      await page.getByRole('button', { name: 'view' }).click()
+      await expect(page.getByTestId('blog-likes')).toHaveText('0')
+      await page.getByRole('button', { name: 'like' }).click()
+      await expect(page.getByTestId('blog-likes')).toHaveText('1')
+    })
   })
 })

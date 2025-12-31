@@ -40,7 +40,7 @@ const Blog = ({ blog, handleLikes, username, handleRemove }) => {
       <div style={showWhenVisible} className='blogDetail'>
         <div>{blog.url}</div>
         <div>
-          likes {blog.likes}
+          likes <span data-testid='blog-likes'>{blog.likes}</span>
           <button onClick={addLikes}>like</button>
         </div>
         <div>{username}</div>
