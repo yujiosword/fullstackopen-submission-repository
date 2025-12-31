@@ -47,14 +47,14 @@ describe('Blog app', () => {
       await loginWith(page, 'kinkin', '1234')
     })
 
-    test('a new blog can be created', async ({ page}) => {
+    test('a new blog can be created', async ({ page }) => {
       await createBlog(page, 'book title', 'book author', 'book url')
 
       await expect(page.getByText('book title', { exact: true })).toBeVisible()
       await expect(page.getByText('book author', { exact: true })).toBeVisible()
     })
 
-    test('a blog can be liked', async ({ page}) => {
+    test('a blog can be liked', async ({ page }) => {
       await createBlog(page, 'book title', 'book author', 'book url')
 
       await page.getByRole('button', { name: 'view' }).click()
@@ -63,7 +63,7 @@ describe('Blog app', () => {
       await expect(page.getByTestId('blog-likes')).toHaveText('1')
     })
 
-    test('a blog can be deleted', async ({ page}) => {
+    test('a blog can be deleted', async ({ page }) => {
       await createBlog(page, 'book title', 'book author', 'book url')
 
       await page.getByRole('button', { name: 'view' }).click()
@@ -85,5 +85,18 @@ describe('Blog app', () => {
       await page.getByRole('button', { name: 'view' }).click()
       await expect(page.getByRole('button', { name: 'remove' })).not.toBeVisible()
     })
+
+    test('blogs are arranged in the order according to the likes', async ({ page }) => {
+      await createBlog(page, 'book title1', 'book author1', 'book url1')
+      await createBlog(page, 'book title2', 'book author2', 'book url2')
+
+      await page.getByRole('button', { name: 'view' }).first().click()
+      await page.getByRole('button', { name: 'view' }).first().click()
+
+      await page.getByRole('button', { name: 'like' }).nth(1).click()
+
+      await expect(page.getByTestId('blog-likes').first()).toHaveText('1')
+      await expect(page.getByTestId('blog-likes').nth(1)).toHaveText('0')
+    }) 
   })
 })
